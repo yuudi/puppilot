@@ -1,36 +1,36 @@
 import { Page } from "puppeteer-core";
-import { JobResult, Store } from "../types.js";
+import { JobResult, SailStatus, Store } from "../types";
 import { TaskPool, waitWithTimeout } from "../utils/index.js";
 import { Course } from "./course.js";
 
-type SailStatus = "created" | "processing" | "completed";
-
 export interface Sailer {
-  getNewPage: () => Promise<Page>;
-  getStore: (store: string) => Promise<Store>;
+  getNewPage: () => Promise<Page> | Page;
+  getStore: (store: string) => Promise<Store> | Store;
 }
 
 export class Sail {
   private status: SailStatus = "created";
-  private total: number;
-  private done: number;
-  private taskPool: TaskPool;
-  private results: (JobResult | { status: "processing" } | undefined)[];
+  private total!: number;
+  private done!: number;
+  private taskPool!: TaskPool;
+  private results!: (JobResult | { status: "processing" } | undefined)[];
+  private courses!: Course[];
 
-  constructor(
-    private courses: Course[],
-    private config: Readonly<{
+  public static create(
+    courses: Course[],
+    config: Readonly<{
       maxParallelRoutine?: number;
     }>,
   ) {
-    this.total = courses.length;
-    this.results = Array(this.total);
-    this.done = 0;
-  }
+    const sail = new Sail();
+    sail.courses = courses;
+    sail.total = courses.length;
+    sail.results = Array<undefined>(sail.total);
+    sail.done = 0;
+    const maxParallelRoutine = config.maxParallelRoutine || 1;
+    sail.taskPool = new TaskPool(maxParallelRoutine);
 
-  public async init() {
-    const maxParallelRoutine = this.config.maxParallelRoutine || 1;
-    this.taskPool = new TaskPool(maxParallelRoutine);
+    return sail;
   }
 
   private async startRoutine(index: number, course: Course, sailer: Sailer) {
@@ -45,7 +45,7 @@ export class Sail {
     } catch (error) {
       this.results[index] = {
         status: "error" as const,
-        message: String(error?.message || error),
+        message: String((error as Error).message || error),
       };
     } finally {
       this.done += 1;
@@ -67,17 +67,17 @@ export class Sail {
     return this.results.map(
       (result) =>
         result ?? {
-          status: "pending" as const,
+          status: "queued" as const,
         },
     );
   }
 
-  public async getStatus() {
+  public getStatus() {
     return {
       status: this.status,
       total: this.total,
       done: this.done,
-      results: this.getResults(),
+      jobs: this.getResults(),
     };
   }
 

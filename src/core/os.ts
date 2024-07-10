@@ -12,7 +12,12 @@ async function systemExec(command: string) {
   });
 }
 
-abstract class OSOperation {}
+abstract class OSOperation {
+  abstract getBrowserPath(
+    browser: "chrome" | "firefox",
+  ): Promise<string | null>;
+  abstract checkBrowserRunning(browser: "chrome" | "firefox"): Promise<boolean>;
+}
 
 class WindowsOperation extends OSOperation {
   async getBrowserPath(browser: "chrome" | "firefox"): Promise<string | null> {
@@ -40,14 +45,18 @@ class WindowsOperation extends OSOperation {
     return chromeExe.includes(`${browser}.exe`);
   }
 
-  getChromeProfilePath(): string {
-    return `${process.env.LOCALAPPDATA}\\Google\\Chrome\\User Data`;
+  getChromeProfilePath(): string | null {
+    const localAppData = process.env.LOCALAPPDATA;
+    if (!localAppData) {
+      return null;
+    }
+    return `${localAppData}\\Google\\Chrome\\User Data`;
   }
 }
 
 export async function getChromePaths() {
-  let chromePath: string;
-  let profilePath: string;
+  let chromePath: string | null;
+  let profilePath: string | null;
   switch (process.platform) {
     case "win32": {
       const op = new WindowsOperation();

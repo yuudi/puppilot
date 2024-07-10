@@ -8,7 +8,7 @@ export class TaskPool {
     if (this.runningTasks < this.maxParallel) {
       return this.executeTask(task);
     } else {
-      return new Promise<T>((resolve, reject) => {
+      return new Promise<T>((resolve, reject: (error: unknown) => void) => {
         this.taskQueue.push(() => {
           this.executeTask(task).then(resolve).catch(reject);
         });
@@ -23,7 +23,7 @@ export class TaskPool {
       return result;
     } finally {
       this.runningTasks--;
-      this.taskQueue.shift()?.();
+      this.taskQueue.shift()();
     }
   }
 }

@@ -2,28 +2,30 @@ import { Config } from "../config.js";
 import { PuppeteerBrowser } from "./browser.js";
 import { Chart } from "./chart.js";
 import { getChromePaths } from "./os.js";
-import { Sail } from "./sail.js";
+import { Sail, Sailer } from "./sail.js";
 
 export class Puppilot {
-  private browser: PuppeteerBrowser;
-  private chart: Chart;
+  private browser!: PuppeteerBrowser;
+  private chart!: Chart;
   private sails: Sail[] = [];
 
-  constructor(private config: Config) {}
+  public static async create(config: Config) {
+    const puppilot = new Puppilot();
 
-  public async init() {
     const { chromePath, profilePath } = await getChromePaths();
+    if (!chromePath || !profilePath) {
+      throw new Error("Chrome path not found");
+    }
 
-    this.browser = new PuppeteerBrowser();
-    await this.browser.init({
+    puppilot.browser = await PuppeteerBrowser.create({
       executablePath: chromePath,
-      headless: this.config.browser.headless ?? false,
+      headless: config.browser.headless ?? false,
       userDataDir: profilePath,
       args: ["--profile-directory=Default"],
     });
 
-    this.chart = new Chart("./puppilot-data/routines");
-    await this.chart.init();
+    puppilot.chart = await Chart.create("./puppilot-data/routines");
+    return puppilot;
   }
   public async showSite(url: string) {
     const page = await this.browser.getPage();
@@ -32,21 +34,23 @@ export class Puppilot {
   public async refreshRoutines() {
     return this.chart.refreshFolder();
   }
-  public async downloadRoutine(url: string) {}
-  public async listRoutines() {
+  // public async downloadRoutine(url: string) {}
+  public listRoutines() {
     return this.chart.listCourses();
   }
-  public async sail(routineIds: string[]) {
+  public getRoutine(routineId: string) {
+    return this.chart.getCourse(routineId)?.meta;
+  }
+  public sail(routineIds: string[]) {
     const courses = this.chart.getCourses(routineIds);
-    const sailer = {
+    const sailer: Sailer = {
       getNewPage: async () => this.browser.getPage(),
-      getStore: async (store: string) => this.chart.getDbStore(store),
+      getStore: (store: string) => this.chart.getDbStore(store),
     };
-    const sail = new Sail(courses, {
+    const sail = Sail.create(courses, {
       maxParallelRoutine: 1,
     });
-    await sail.init();
-    sail.start(sailer);
+    void sail.start(sailer);
     return this.sails.push(sail) - 1;
   }
   public getSails() {
@@ -54,8 +58,8 @@ export class Puppilot {
       id: index,
     }));
   }
-  public async getSail(sailId: number) {
-    return this.sails[sailId]?.getStatus();
+  public getSail(sailId: number) {
+    return this.sails.at(sailId)?.getStatus();
   }
   public async close() {
     await this.browser.close();

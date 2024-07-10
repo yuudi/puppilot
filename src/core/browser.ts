@@ -5,9 +5,20 @@ import puppeteer, {
 } from "puppeteer-core";
 
 export class PuppeteerBrowser {
-  private browser: Browser | null = null;
+  private browser!: Browser;
+
   private defaultPage: Page | null = null;
-  constructor() {}
+
+  public static async create(config: PuppeteerLaunchOptions) {
+    const browser = new PuppeteerBrowser();
+    browser.browser = await puppeteer.launch(config);
+    const pages = await browser.browser.pages();
+    browser.defaultPage = pages[0];
+    browser.browser.on("disconnected", () => {
+      process.exit(0);
+    });
+    return browser;
+  }
 
   public getBrowser() {
     return this.browser;
@@ -28,15 +39,5 @@ export class PuppeteerBrowser {
 
   public async close() {
     await this.browser.close();
-    this.browser = null;
-  }
-
-  public async init(config: PuppeteerLaunchOptions) {
-    this.browser = await puppeteer.launch(config);
-    const pages = await this.browser.pages();
-    this.defaultPage = pages[0];
-    this.browser.on("disconnected", () => {
-      process.exit(0);
-    });
   }
 }

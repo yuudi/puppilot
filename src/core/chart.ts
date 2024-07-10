@@ -4,21 +4,29 @@ import { Course } from "./course.js";
 import { DataHouse } from "./database.js";
 
 export class Chart {
-  private courses: Course[];
-  private db: DataHouse;
-  private routineMap: Map<string, Course> = new Map();
-  constructor(private readonly routinePath: string) {}
+  private routinePath!: string;
+  private courses!: Course[];
+  private db!: DataHouse;
+  private routineMap = new Map<string, Course>();
 
-  public async init() {
+  public static async create(routinePath: string) {
+    const chart = new Chart();
     // initialize database
-    this.db = new DataHouse("puppilot", "./puppilot-data/db");
-    await this.db.init();
+    chart.db = await DataHouse.create("puppilot", "./puppilot-data/db");
+    chart.routinePath = routinePath;
+    await chart.loadCourses();
+    return chart;
+  }
+
+  private async loadCourses() {
     // find all files in the directory
     const fullDirPath = path.resolve(this.routinePath);
     await fs.mkdir(fullDirPath, { recursive: true });
     const files = await fs.readdir(fullDirPath);
     // filter out non-js files
-    const routineFile = files.filter((file) => file.endsWith(".js"));
+    const routineFile = files.filter(
+      (file) => file.endsWith(".js") && !file.startsWith("_"),
+    );
     // load all routines
     this.courses = routineFile.map(
       (file) => new Course(path.join(fullDirPath, file)),
@@ -40,6 +48,10 @@ export class Chart {
     return this.courses;
   }
 
+  public getCourse(routineId: string): Readonly<Course> | undefined {
+    return this.routineMap.get(routineId);
+  }
+
   public getCourses(routineIds: string[]) {
     return routineIds.map((id) => {
       const course = this.routineMap.get(id);
@@ -55,6 +67,6 @@ export class Chart {
   }
 
   public async refreshFolder() {
-    await this.init();
+    await this.loadCourses();
   }
 }

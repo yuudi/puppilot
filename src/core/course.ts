@@ -1,4 +1,4 @@
-import { Routine } from "../types.js";
+import { Routine } from "../types";
 import { Sailer } from "./sail.js";
 
 type RoutineMeta = Pick<
@@ -13,22 +13,26 @@ type RoutineMeta = Pick<
 >;
 
 export class Course {
-  private routineClass: typeof Routine;
+  private routineClass!: typeof Routine;
 
   constructor(public filePath: string) {}
 
-  public get meta(): RoutineMeta {
+  public get meta(): Readonly<RoutineMeta> {
     return this.routineClass;
   }
 
   public async loadRoutine(): Promise<Pick<typeof Routine, "id">> {
-    const routineMod = await import("file://" + this.filePath);
-    this.routineClass = routineMod?.default;
+    const routineMod = (await import("file://" + this.filePath)) as Record<
+      string,
+      unknown
+    >;
+    const defaultValue: unknown = routineMod.default;
 
     // check if default is a class
-    if (typeof this.routineClass !== "function") {
+    if (typeof defaultValue !== "function") {
       throw new Error("Routine must have a default class");
     }
+    this.routineClass = defaultValue as typeof Routine;
     const id = this.routineClass.id;
     if (typeof id !== "string") {
       throw new Error("Routine must have a static id property");
