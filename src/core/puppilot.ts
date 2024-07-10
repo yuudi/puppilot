@@ -44,7 +44,7 @@ export class Puppilot {
   public sail(routineIds: string[]) {
     const courses = this.chart.getCourses(routineIds);
     const sailer: Sailer = {
-      getNewPage: async () => this.browser.getPage(),
+      getNewPage: async () => this.browser.getNewPage(),
       getStore: (store: string) => this.chart.getDbStore(store),
     };
     const sail = Sail.create(courses, {

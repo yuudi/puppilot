@@ -18,8 +18,8 @@ export class DataHouse {
     const db = this.db;
     return {
       async get<T extends JSONValue>(key: string) {
-        const value = await db.get(`${store}/${key}`);
-        return JSON.parse(value) as T;
+        const value = await db.get(`${store}/${key}`).catch(() => undefined);
+        return value === undefined ? undefined : (JSON.parse(value) as T);
       },
       async set(key: string, value: JSONValue) {
         await db.put(`${store}/${key}`, JSON.stringify(value));

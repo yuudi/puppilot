@@ -23,7 +23,7 @@ export class TaskPool {
       return result;
     } finally {
       this.runningTasks--;
-      this.taskQueue.shift()();
+      this.taskQueue.shift()?.();
     }
   }
 }
