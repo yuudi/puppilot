@@ -1,5 +1,5 @@
 import { Store } from "../types";
-import { Shop } from "./shop";
+import { Shop } from "./shop.js";
 
 interface shopInfo {
   url: string;
@@ -27,9 +27,12 @@ export class Market {
           displayName: string;
         }[]
       >("shops")) ?? defaultShops;
-    market.shops = await Promise.all(
-      shopInfos.map(({ url, displayName }) => Shop.create(url, displayName)),
+    const shops = await Promise.all(
+      shopInfos.map(({ url, displayName }) =>
+        Shop.create(url, displayName).catch(() => undefined),
+      ),
     );
+    market.shops = shops.filter((shop): shop is Shop => shop !== undefined);
     return market;
   }
 
@@ -44,8 +47,11 @@ export class Market {
     }));
   }
 
-  public async addShop(url: string, displayName: string) {
-    const shop = await Shop.create(url, displayName);
+  public async addShop(url: string, displayName?: string) {
+    const shop = await Shop.create(
+      url,
+      displayName || "new shop " + String(this.shops.length + 1),
+    );
     this.shops.push(shop);
     await this.store.set("shops", this.getShopsObject());
   }

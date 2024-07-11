@@ -50,7 +50,7 @@ export class Chart {
     );
   }
 
-  public listCourses() {
+  public listCourses(): readonly Course[] {
     return this.courses;
   }
 
@@ -95,6 +95,10 @@ export class Chart {
     const course = new Course(fullFilePath);
     await course.loadRoutine();
     this.routineMap.set(course.meta.id, course);
+  }
+
+  public addShop(url: string, displayName?: string) {
+    return this.market.addShop(url, displayName);
   }
 
   private async validateRoutine(routineText: string) {

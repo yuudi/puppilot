@@ -4,6 +4,7 @@ import { readConfig } from "./config.js";
 import { Puppilot } from "./modules/puppilot.js";
 import {
   ApiError,
+  ApiGetMarketRoutines,
   ApiGetRoutines,
   ApiGetSails,
   ApiGetSailsSailId,
@@ -35,6 +36,51 @@ void (async function () {
         name: displayName,
       })),
     });
+  }) as RequestHandler);
+
+  api.get("/market/routines", (async (
+    req,
+    res: Response<ApiGetMarketRoutines | ApiError>,
+  ) => {
+    const routines = await puppilot.listMarketRoutines();
+    res.json({ routines });
+  }) as RequestHandler);
+
+  api.post("/routines", (async (req, res: Response<undefined | ApiError>) => {
+    const parseResult = zod
+      .object({ url: zod.string().min(1) })
+      .safeParse(req.body);
+    if (!parseResult.success) {
+      res.status(400).json({ error: parseResult.error.toString() });
+      return;
+    }
+    const url = parseResult.data.url;
+    try {
+      await puppilot.downloadMarketRoutine(url);
+    } catch (error) {
+      res.status(500).json({ error: String(error) });
+    }
+    res.status(201);
+  }) as RequestHandler);
+
+  api.post("/market", (async (req, res: Response<undefined | ApiError>) => {
+    const parseResult = zod
+      .object({
+        url: zod.string().min(1),
+        displayName: zod.string().optional(),
+      })
+      .safeParse(req.body);
+    if (!parseResult.success) {
+      res.status(400).json({ error: parseResult.error.toString() });
+      return;
+    }
+    const { url, displayName } = parseResult.data;
+    try {
+      await puppilot.addShop(url, displayName);
+    } catch (error) {
+      res.status(500).json({ error: String(error) });
+    }
+    res.status(201);
   }) as RequestHandler);
 
   api.post("/sails", ((req, res: Response<ApiPostSails | ApiError>) => {

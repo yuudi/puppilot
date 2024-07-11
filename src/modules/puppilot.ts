@@ -39,12 +39,20 @@ export class Puppilot {
   public async refreshRoutines() {
     return this.chart.refreshFolder();
   }
-  // public async downloadRoutine(url: string) {}
   public listRoutines() {
     return this.chart.listCourses();
   }
   public getRoutine(routineId: string) {
     return this.chart.getCourse(routineId)?.meta;
+  }
+  public listMarketRoutines() {
+    return this.chart.getMarketRoutines();
+  }
+  public downloadMarketRoutine(url: string) {
+    return this.chart.downloadRoutine(url);
+  }
+  public addShop(url: string, displayName?: string) {
+    return this.chart.addShop(url, displayName);
   }
   public sail(routineIds: string[]) {
     const courses = this.chart.getCourses(routineIds);

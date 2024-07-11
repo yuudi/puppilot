@@ -19,7 +19,12 @@ export class Shop {
     const shop = new Shop();
     shop.url = url;
     shop.displayName = displayName;
-    shop.routines = await shop.fetchRoutines();
+    try {
+      shop.routines = await shop.fetchRoutines();
+    } catch (error) {
+      console.error(error);
+      throw new Error("cannot load shop", { cause: error });
+    }
     return shop;
   }
 
@@ -28,8 +33,11 @@ export class Shop {
     if (!resp.ok) {
       throw new Error(`Failed to fetch routines from ${this.url}`);
     }
-    const routines = shopResponseSchema.parse(await resp.json());
-    return routines.routines;
+    const routines = shopResponseSchema.parse(await resp.json()).routines;
+    return routines.map((routine) => {
+      routine.url = new URL(routine.url, this.url).href; // resolve relative url
+      return routine;
+    });
   }
 
   public getRoutines(): Readonly<typeof this.routines> {

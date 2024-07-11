@@ -14,6 +14,15 @@ export interface ApiGetRoutines {
     name: string;
   }[];
 }
+
+export interface ApiGetMarketRoutines {
+  routines: {
+    id: string;
+    displayName: string;
+    url: string;
+  }[];
+}
+
 export interface ApiGetSails {
   sails: {
     id: number;
