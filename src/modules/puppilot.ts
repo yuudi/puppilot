@@ -1,7 +1,7 @@
 import { Config } from "../config.js";
 import { PuppeteerBrowser } from "./browser.js";
 import { Chart } from "./chart.js";
-import { getChromePaths } from "./os.js";
+import { getOSOperations } from "./os.js";
 import { Sail, Sailer } from "./sail.js";
 
 export class Puppilot {
@@ -12,15 +12,20 @@ export class Puppilot {
   public static async create(config: Config) {
     const puppilot = new Puppilot();
 
-    const { chromePath, profilePath } = await getChromePaths();
-    if (!chromePath || !profilePath) {
+    const OSOperation = await getOSOperations();
+    const executablePath =
+      config.browser.executablePath ||
+      (await OSOperation.getBrowserPath(config.browser.browser));
+    const userDataDir =
+      config.browser.userDataDir || (await OSOperation.getChromeProfilePath());
+    if (!executablePath || !userDataDir) {
       throw new Error("Chrome path not found");
     }
 
     puppilot.browser = await PuppeteerBrowser.create({
-      executablePath: chromePath,
+      executablePath,
       headless: config.browser.headless ?? false,
-      userDataDir: profilePath,
+      userDataDir,
       args: ["--profile-directory=Default"],
     });
 

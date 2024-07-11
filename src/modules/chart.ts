@@ -1,13 +1,18 @@
 import { promises as fs } from "fs";
 import path from "path";
+import { Routine } from "puppilot-routine-base";
+import { RoutineClassSchema } from "../types/routine.js";
 import { Course } from "./course.js";
 import { DataHouse } from "./database.js";
+import { Market } from "./market.js";
+import { importString } from "./os.js";
 
 export class Chart {
   private routinePath!: string;
   private courses!: Course[];
   private db!: DataHouse;
   private routineMap = new Map<string, Course>();
+  private market!: Market;
 
   public static async create(routinePath: string) {
     const chart = new Chart();
@@ -15,6 +20,7 @@ export class Chart {
     chart.db = await DataHouse.create("puppilot", "./puppilot-data/db");
     chart.routinePath = routinePath;
     await chart.loadCourses();
+    chart.market = await Market.create(chart.db.getStore("meta/market"));
     return chart;
   }
 
@@ -68,5 +74,36 @@ export class Chart {
 
   public async refreshFolder() {
     await this.loadCourses();
+  }
+
+  public async getMarketRoutines() {
+    return this.market.getRoutines();
+  }
+
+  public async downloadRoutine(url: string) {
+    const resp = await fetch(url);
+    if (!resp.ok) {
+      throw new Error(`Failed to fetch routines from ${url}`);
+    }
+    const routineText = await resp.text();
+    await this.validateRoutine(routineText);
+    const fileName = path.basename(url);
+    const fullFilePath = path.resolve(this.routinePath, fileName);
+
+    await fs.writeFile(fullFilePath, routineText);
+
+    const course = new Course(fullFilePath);
+    await course.loadRoutine();
+    this.routineMap.set(course.meta.id, course);
+  }
+
+  private async validateRoutine(routineText: string) {
+    const routineMod = (await importString(routineText)) as Record<
+      string,
+      unknown
+    >;
+    const routineClass = routineMod.default as typeof Routine;
+    RoutineClassSchema.parse(routineClass); // do some validation, this cannot guarantee the routine is valid but it can help
+    return routineClass;
   }
 }
