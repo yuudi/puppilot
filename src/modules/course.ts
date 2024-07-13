@@ -27,9 +27,7 @@ export class Course {
       string,
       unknown
     >;
-    this.routineClass = routineMod.default as typeof Routine;
-
-    RoutineClassSchema.parse(this.routineClass); // do some validation, this cannot guarantee the routine is valid but it can help
+    this.routineClass = RoutineClassSchema.parse(routineMod.default);
     return this.routineClass;
   }
 

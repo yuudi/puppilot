@@ -5,12 +5,15 @@ import { getOSOperations } from "./os.js";
 import { Sail, Sailer } from "./sail.js";
 
 export class Puppilot {
+  private instanceId!: string;
   private browser!: PuppeteerBrowser;
   private chart!: Chart;
   private sails: Sail[] = [];
 
   public static async create(config: Config) {
     const puppilot = new Puppilot();
+
+    puppilot.instanceId = String(new Date().getTime());
 
     const OSOperation = await getOSOperations();
     const executablePath =
@@ -64,14 +67,18 @@ export class Puppilot {
       maxParallelRoutine: 1,
     });
     void sail.start(sailer);
-    return this.sails.push(sail) - 1;
+    const instanceSailId = this.sails.push(sail) - 1;
+    return this.instanceId + "-" + instanceSailId.toString();
   }
   public getSails() {
     return this.sails.map((_, index) => ({
-      id: index,
+      id: this.instanceId + "-" + index.toString(),
     }));
   }
-  public getSail(sailId: number) {
+  public getSail(instanceId: string, sailId: number) {
+    if (instanceId !== this.instanceId) {
+      return;
+    }
     return this.sails.at(sailId)?.getStatus();
   }
   public async close() {

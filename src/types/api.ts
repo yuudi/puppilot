@@ -25,12 +25,12 @@ export interface ApiGetMarketRoutines {
 
 export interface ApiGetSails {
   sails: {
-    id: number;
+    id: string;
   }[];
 }
 
 export interface ApiPostSails {
-  sailId: number;
+  sailId: string;
 }
 
 export interface ApiGetSailsSailId {

@@ -1,6 +1,5 @@
 import { promises as fs } from "fs";
 import path from "path";
-import { Routine } from "puppilot-routine-base";
 import { RoutineClassSchema } from "../types/routine.js";
 import { Course } from "./course.js";
 import { DataHouse } from "./database.js";
@@ -9,9 +8,8 @@ import { importString } from "./os.js";
 
 export class Chart {
   private routinePath!: string;
-  private courses!: Course[];
   private db!: DataHouse;
-  private routineMap = new Map<string, Course>();
+  private courseMap = new Map<string, Course>();
   private market!: Market;
 
   public static async create(routinePath: string) {
@@ -34,14 +32,14 @@ export class Chart {
       (file) => file.endsWith(".js") && !file.startsWith("_"),
     );
     // load all routines
-    this.courses = routineFile.map(
+    const courses = routineFile.map(
       (file) => new Course(path.join(fullDirPath, file)),
     );
     await Promise.all(
-      this.courses.map(async (course) => {
+      courses.map(async (course) => {
         try {
           const routine = await course.loadRoutine();
-          this.routineMap.set(routine.id, course);
+          this.courseMap.set(routine.id, course);
         } catch (error) {
           console.error(`Error loading routine from ${course.filePath}`);
           console.error(error);
@@ -51,18 +49,18 @@ export class Chart {
   }
 
   public listCourses(): readonly Course[] {
-    return this.courses;
+    return Array.from(this.courseMap.values());
   }
 
   public getCourse(routineId: string): Readonly<Course> | undefined {
-    return this.routineMap.get(routineId);
+    return this.courseMap.get(routineId);
   }
 
   public getCourses(routineIds: string[]) {
     return routineIds.map((id) => {
-      const course = this.routineMap.get(id);
+      const course = this.courseMap.get(id);
       if (!course) {
-        throw new Error(`Routine with id ${id} not found`);
+        throw new Error(`Routine with id "${id}" not found`);
       }
       return course;
     });
@@ -94,7 +92,7 @@ export class Chart {
 
     const course = new Course(fullFilePath);
     await course.loadRoutine();
-    this.routineMap.set(course.meta.id, course);
+    this.courseMap.set(course.meta.id, course);
   }
 
   public addShop(url: string, displayName?: string) {
@@ -106,8 +104,7 @@ export class Chart {
       string,
       unknown
     >;
-    const routineClass = routineMod.default as typeof Routine;
-    RoutineClassSchema.parse(routineClass); // do some validation, this cannot guarantee the routine is valid but it can help
+    const routineClass = RoutineClassSchema.parse(routineMod.default);
     return routineClass;
   }
 }

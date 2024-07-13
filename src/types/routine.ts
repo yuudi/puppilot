@@ -18,16 +18,27 @@ export declare class Routine {
   public start(): Promise<JobResult>;
 }
 
-export const RoutineClassSchema = z.object({
-  displayName: z.string(),
-  id: z.string(),
-  author: z.string().optional(),
-  reportEmail: z.string().optional(),
-  reportUrl: z.string().optional(),
-  description: z.string().optional(),
-  timeLimit: z.number(),
-  start: z
-    .function()
-    .args()
-    .returns(z.promise(z.object({ status: z.string(), message: z.string() }))),
-});
+function isValidNumber(num: unknown): num is number {
+  return typeof num === "number" && isFinite(num);
+}
+
+function isString(str: unknown): str is string {
+  return typeof str === "string";
+}
+
+function isOptionalString(str: unknown): str is string | undefined {
+  return str === undefined || typeof str === "string";
+}
+
+export const RoutineClassSchema = z.custom<typeof Routine>(
+  // do some validation, this cannot guarantee the routine is valid but it can help
+  (routineClass: typeof Routine) =>
+    typeof routineClass === "function" &&
+    isString(routineClass.displayName) &&
+    isString(routineClass.id) &&
+    isOptionalString(routineClass.author) &&
+    isOptionalString(routineClass.reportEmail) &&
+    isOptionalString(routineClass.reportUrl) &&
+    isOptionalString(routineClass.description) &&
+    isValidNumber(routineClass.timeLimit),
+);

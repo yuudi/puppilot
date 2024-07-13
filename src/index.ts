@@ -59,6 +59,7 @@ void (async function () {
       await puppilot.downloadMarketRoutine(url);
     } catch (error) {
       res.status(500).json({ error: String(error) });
+      return;
     }
     res.status(201);
   }) as RequestHandler);
@@ -104,8 +105,15 @@ void (async function () {
     req,
     res: Response<ApiGetSailsSailId | ApiError>,
   ) => {
-    const sailId = +req.params.sailId;
-    const sail = puppilot.getSail(sailId);
+    const parseResult = zod
+      .custom<`${number}-${number}`>((str) => typeof str === "string" && /^[0-9]+-[0-9]+$/.test(str))
+      .safeParse(req.params.sailId);
+    if (!parseResult.success) {
+      res.status(400).json({ error: parseResult.error.toString() });
+      return;
+    }
+    const [instanceId, sailId] = parseResult.data.split("-");
+    const sail = puppilot.getSail(instanceId, +sailId);
     if (!sail) {
       res.status(404).json({ error: "Sail not found" });
       return;
