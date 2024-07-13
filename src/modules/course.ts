@@ -5,6 +5,7 @@ import { Sailer } from "./sail.js";
 type RoutineMeta = Pick<
   typeof Routine,
   | "id"
+  | "version"
   | "displayName"
   | "author"
   | "description"

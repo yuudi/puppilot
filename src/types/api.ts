@@ -8,19 +8,23 @@ export type SailJobStatus =
       status: "processing" | "queued";
     };
 
+interface ApiRoutine {
+  id: string;
+  displayName: string;
+  version: string | number | (number | string)[];
+  author?: string;
+  description?: string;
+}
+
 export interface ApiGetRoutines {
-  routines: {
-    id: string;
-    name: string;
-  }[];
+  routines: ApiRoutine[];
 }
 
 export interface ApiGetMarketRoutines {
-  routines: {
-    id: string;
-    displayName: string;
+  routines: (ApiRoutine & {
     url: string;
-  }[];
+    updateTime: number;
+  })[];
 }
 
 export interface ApiGetSails {

@@ -31,10 +31,15 @@ void (async function () {
     }
     const routines = puppilot.listRoutines();
     res.json({
-      routines: routines.map(({ meta: { id, displayName } }) => ({
-        id,
-        name: displayName,
-      })),
+      routines: routines.map(
+        ({ meta: { id, displayName, version, author, description } }) => ({
+          id,
+          displayName,
+          version,
+          author,
+          description,
+        }),
+      ),
     });
   }) as RequestHandler);
 

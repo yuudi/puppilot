@@ -4,8 +4,16 @@ const shopResponseSchema = zod.object({
   routines: zod.array(
     zod.object({
       id: zod.string(),
-      displayName: zod.string(),
       url: zod.string(),
+      version: zod.union([
+        zod.string(),
+        zod.number(),
+        zod.array(zod.union([zod.string(), zod.number()])),
+      ]),
+      updateTime: zod.number(),
+      displayName: zod.string(),
+      author: zod.string().optional(),
+      description: zod.string().optional(),
     }),
   ),
 });

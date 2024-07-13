@@ -5,6 +5,7 @@ import { z } from "zod";
 export declare class Routine {
   public static readonly displayName: string;
   public static readonly author?: string;
+  public static readonly version: string | number | (number | string)[];
   public static readonly reportEmail?: string;
   public static readonly reportUrl?: string;
   public static readonly description?: string;

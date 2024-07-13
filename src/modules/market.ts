@@ -9,7 +9,7 @@ interface shopInfo {
 const defaultShops: shopInfo[] = [
   {
     url: "https://puppilot-org.github.io/puppilot-routines/index.json",
-    displayName: "Default Shop",
+    displayName: "Official Shop",
   },
 ];
 
