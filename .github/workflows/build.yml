@@ -1,0 +1,43 @@
+name: Build
+
+on:
+  push:
+    tags: v*
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Cache npm
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install dependencies
+        run: npm clean-install --omit=dev --no-audit
+
+      - name: Build
+        run: npm run build -- --outfile=./release/puppilot.js
+
+      - name: Compression
+        run: tar -Jcf release.tar.xz release
+
+      - name: create release
+        run: |
+          echo "Creating release"
+          gh release create ${{ github.ref }} release.tar.xz
+        env:
+          GH_TOKEN: ${{ github.token }}

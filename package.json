@@ -5,7 +5,7 @@
   "type": "module",
   "main": "src/index.ts",
   "scripts": {
-    "build": "esbuild ./src/index.ts --bundle --outfile=./dist/puppilot.js --format=cjs --platform=node --target=node20 --sourcemap",
+    "build": "esbuild ./src/index.ts --bundle --outfile=./dist/puppilot.cjs --format=cjs --platform=node --target=node20 --sourcemap",
     "build:tsc": "tsc --build",
     "lint": "eslint ./src ",
     "lint:fix": "eslint ./src --fix",
