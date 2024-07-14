@@ -19,6 +19,9 @@ void (async function () {
   const puppilot = await Puppilot.create(config);
 
   const app = express();
+
+  app.use(express.static("puppilot-data/gui"));
+
   app.use(express.json());
 
   const api = express.Router();
@@ -66,7 +69,7 @@ void (async function () {
       res.status(500).json({ error: String(error) });
       return;
     }
-    res.status(201);
+    res.status(201).send();
   }) as RequestHandler);
 
   api.post("/market", (async (req, res: Response<undefined | ApiError>) => {
