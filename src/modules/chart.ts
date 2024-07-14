@@ -4,7 +4,7 @@ import { RoutineClassSchema } from "../types/routine.js";
 import { Course } from "./course.js";
 import { DataHouse } from "./database.js";
 import { Market } from "./market.js";
-import { importString } from "./os.js";
+import { importFile } from "./os.js";
 
 export class Chart {
   private routinePath!: string;
@@ -84,11 +84,18 @@ export class Chart {
       throw new Error(`Failed to fetch routines from ${url}`);
     }
     const routineText = await resp.text();
-    await this.validateRoutine(routineText);
     const fileName = path.basename(url);
+    const tmpPath = path.resolve(this.routinePath, `_${fileName}`);
+    await fs.writeFile(tmpPath, routineText);
+    try {
+      await this.validateRoutine(tmpPath);
+    } catch (error) {
+      await fs.unlink(tmpPath);
+      throw error;
+    }
     const fullFilePath = path.resolve(this.routinePath, fileName);
 
-    await fs.writeFile(fullFilePath, routineText);
+    await fs.rename(tmpPath, fullFilePath);
 
     const course = new Course(fullFilePath);
     await course.loadRoutine();
@@ -99,8 +106,8 @@ export class Chart {
     return this.market.addShop(url, displayName);
   }
 
-  private async validateRoutine(routineText: string) {
-    const routineMod = (await importString(routineText)) as Record<
+  private async validateRoutine(routinePath: string) {
+    const routineMod = (await importFile(routinePath)) as Record<
       string,
       unknown
     >;

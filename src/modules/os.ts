@@ -116,7 +116,13 @@ export async function importFile(filePath: string): Promise<unknown> {
   }
 }
 
-export async function importString(content: string) {
-  const b64File = "data:text/javascript;base64," + btoa(content);
-  return import(b64File);
+export function getTmpDir(): string {
+  switch (process.platform) {
+    case "win32":
+      return process.env.TEMP || "C:\\Windows\\Temp";
+    case "linux":
+      return process.env.TMPDIR || "/tmp";
+    default:
+      throw new Error("not implemented yet");
+  }
 }
