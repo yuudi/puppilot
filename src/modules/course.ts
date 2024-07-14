@@ -1,9 +1,10 @@
-import { Routine, RoutineClassSchema } from "../types/routine";
+import * as puppeteer from "puppeteer-core";
+import { Routine, RoutineFuncSchema } from "../types";
 import { importFile } from "./os";
 import { Sailer } from "./sail";
 
 type RoutineMeta = Pick<
-  typeof Routine,
+  Routine,
   | "id"
   | "version"
   | "displayName"
@@ -15,28 +16,26 @@ type RoutineMeta = Pick<
 >;
 
 export class Course {
-  private routineClass!: typeof Routine;
-
-  constructor(public filePath: string) {}
+  private routine!: Routine;
 
   public get meta(): Readonly<RoutineMeta> {
-    return this.routineClass;
+    return this.routine;
   }
 
-  public async loadRoutine(): Promise<Pick<typeof Routine, "id">> {
-    const routineMod = (await importFile(this.filePath)) as Record<
-      string,
-      unknown
-    >;
-    this.routineClass = RoutineClassSchema.parse(routineMod.default);
-    return this.routineClass;
+  public static async create(filePath: string): Promise<Course> {
+    const course = new Course();
+    const routineMod = (await importFile(filePath)) as Record<string, unknown>;
+    course.routine = RoutineFuncSchema.parse(routineMod.default)() as Routine;
+    return course;
   }
 
   public async startRoutine(sailer: Sailer) {
-    const routine = new this.routineClass(
-      sailer.getNewPage,
-      sailer.getStore.bind(null, "routine/" + this.routineClass.id),
+    return this.routine.start(
+      {
+        getPage: sailer.getNewPage,
+        getStore: sailer.getStore.bind(null, "routine/" + this.routine.id),
+      },
+      { puppeteer },
     );
-    return routine.start();
   }
 }

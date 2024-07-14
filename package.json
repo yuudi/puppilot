@@ -1,6 +1,6 @@
 {
   "name": "puppilot",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "main": "src/index.ts",
@@ -16,7 +16,6 @@
     "esbuild": "~0.23.0",
     "express": "^4.19.2",
     "puppeteer-core": "^22.12.1",
-    "puppilot-routine-base": "github:puppilot-org/puppilot-routine-base",
     "zod": "^3.23.8"
   },
   "devDependencies": {

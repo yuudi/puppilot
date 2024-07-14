@@ -1,6 +1,6 @@
 import { promises as fs } from "fs";
 import path from "path";
-import { RoutineClassSchema } from "../types/routine";
+import { RoutineFuncSchema } from "../types";
 import { Course } from "./course";
 import { DataHouse } from "./database";
 import { Market } from "./market";
@@ -28,20 +28,19 @@ export class Chart {
     await fs.mkdir(fullDirPath, { recursive: true });
     const files = await fs.readdir(fullDirPath);
     // filter out non-js files
-    const routineFile = files.filter(
-      (file) => file.endsWith(".js") && !file.startsWith("_"),
+    const routineFiles = files.filter(
+      (file) => file.endsWith(".mjs") && !file.startsWith("_"),
     );
     // load all routines
-    const courses = routineFile.map(
-      (file) => new Course(path.join(fullDirPath, file)),
-    );
+
     await Promise.all(
-      courses.map(async (course) => {
+      routineFiles.map(async (routineFile) => {
+        const fullPath = path.resolve(fullDirPath, routineFile);
         try {
-          const routine = await course.loadRoutine();
-          this.courseMap.set(routine.id, course);
+          const course = await Course.create(fullPath);
+          this.courseMap.set(course.meta.id, course);
         } catch (error) {
-          console.error(`Error loading routine from ${course.filePath}`);
+          console.error(`Error loading routine from ${fullPath}`);
           console.error(error);
         }
       }),
@@ -85,7 +84,10 @@ export class Chart {
     }
     const routineText = await resp.text();
     const fileName = path.basename(url);
-    const tmpPath = path.resolve(this.routinePath, `_${fileName}`);
+    // rename extension to .mjs
+    const extIndex = fileName.lastIndexOf(".");
+    const newFileName = fileName.slice(0, extIndex) + ".mjs";
+    const tmpPath = path.resolve(this.routinePath, `_${newFileName}`);
     await fs.writeFile(tmpPath, routineText);
     try {
       await this.validateRoutine(tmpPath);
@@ -93,12 +95,11 @@ export class Chart {
       await fs.unlink(tmpPath);
       throw error;
     }
-    const fullFilePath = path.resolve(this.routinePath, fileName);
+    const fullFilePath = path.resolve(this.routinePath, newFileName);
 
     await fs.rename(tmpPath, fullFilePath);
 
-    const course = new Course(fullFilePath);
-    await course.loadRoutine();
+    const course = await Course.create(fullFilePath);
     this.courseMap.set(course.meta.id, course);
   }
 
@@ -111,7 +112,7 @@ export class Chart {
       string,
       unknown
     >;
-    const routineClass = RoutineClassSchema.parse(routineMod.default);
-    return routineClass;
+    const routineFunc = RoutineFuncSchema.parse(routineMod.default);
+    return routineFunc;
   }
 }

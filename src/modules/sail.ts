@@ -40,7 +40,7 @@ export class Sail {
     try {
       this.results[index] = await waitWithTimeout(
         course.startRoutine(sailer),
-        course.meta.timeLimit,
+        course.meta.timeLimit ?? 120_000 /* 2 minutes */,
       );
     } catch (error) {
       this.results[index] = {
