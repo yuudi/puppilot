@@ -1,2 +1,2 @@
-export * from "./common.js";
-export * from "./task-pool.js";
+export * from "./common";
+export * from "./task-pool";

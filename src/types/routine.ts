@@ -1,6 +1,7 @@
 import { Page } from "puppeteer-core";
 import { JobResult, Store } from "puppilot-routine-base";
 import { z } from "zod";
+import { Promisable } from "./common";
 
 export declare class Routine {
   public static readonly displayName: string;
@@ -13,8 +14,8 @@ export declare class Routine {
   public static readonly id: string;
 
   constructor(
-    getPage: () => Promise<Page> | Page,
-    getStore: () => Promise<Store> | Store,
+    getPage: () => Promisable<Page>,
+    getStore: () => Promisable<Store>,
   );
   public start(): Promise<JobResult>;
 }

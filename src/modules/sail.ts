@@ -1,11 +1,11 @@
 import { Page } from "puppeteer-core";
-import { JobResult, SailStatus, Store } from "../types";
-import { TaskPool, waitWithTimeout } from "../utils/index.js";
-import { Course } from "./course.js";
+import { JobResult, Promisable, SailStatus, Store } from "../types";
+import { TaskPool, waitWithTimeout } from "../utils/index";
+import { Course } from "./course";
 
 export interface Sailer {
-  getNewPage: () => Promise<Page> | Page;
-  getStore: (store: string) => Promise<Store> | Store;
+  getNewPage: () => Promisable<Page>;
+  getStore: (store: string) => Promisable<Store>;
 }
 
 export class Sail {

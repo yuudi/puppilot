@@ -1,8 +1,8 @@
-import { Config } from "../config.js";
-import { PuppeteerBrowser } from "./browser.js";
-import { Chart } from "./chart.js";
-import { getOSOperations } from "./os.js";
-import { Sail, Sailer } from "./sail.js";
+import { Config } from "../config";
+import { PuppeteerBrowser } from "./browser";
+import { Chart } from "./chart";
+import { getOSOperations } from "./os";
+import { Sail, Sailer } from "./sail";
 
 export class Puppilot {
   private instanceId!: string;

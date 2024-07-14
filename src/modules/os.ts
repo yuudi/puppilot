@@ -1,6 +1,6 @@
 import { exec } from "child_process";
 import { resolve as pathResolve } from "path";
-import { Promisable } from "../types/common";
+import { Promisable } from "../types";
 
 async function systemExec(command: string) {
   return new Promise<{ stdout: string; stderr: string }>((resolve, reject) => {

@@ -1,21 +1,22 @@
 {
   "name": "puppilot",
+  "version": "0.1.0",
   "private": true,
   "type": "module",
   "main": "src/index.ts",
   "scripts": {
-    "build": "tsc --build",
+    "build": "esbuild ./src/index.ts --bundle --outfile=./dist/puppilot.js --format=cjs --platform=node --target=node20 --sourcemap",
+    "build:tsc": "tsc --build",
     "lint": "eslint ./src ",
     "lint:fix": "eslint ./src --fix",
-    "start": "tsc --build && node ./dist/index.js"
+    "start": "tsx ./src/index.ts"
   },
   "dependencies": {
     "@iarna/toml": "^2.2.5",
+    "esbuild": "~0.23.0",
     "express": "^4.19.2",
-    "level": "^8.0.1",
     "puppeteer-core": "^22.12.1",
     "puppilot-routine-base": "github:puppilot-org/puppilot-routine-base",
-    "typescript": "^5.5.3",
     "zod": "^3.23.8"
   },
   "devDependencies": {
@@ -27,6 +28,8 @@
     "prettier": "3.3.2",
     "prettier-plugin-organize-imports": "^4.0.0",
     "prettier-plugin-packagejson": "^2.5.0",
+    "tsx": "^4.16.2",
+    "typescript": "^5.5.3",
     "typescript-eslint": "^7.15.0"
   }
 }

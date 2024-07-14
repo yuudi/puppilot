@@ -1,6 +1,6 @@
-import { Routine, RoutineClassSchema } from "../types/routine.js";
-import { importFile } from "./os.js";
-import { Sailer } from "./sail.js";
+import { Routine, RoutineClassSchema } from "../types/routine";
+import { importFile } from "./os";
+import { Sailer } from "./sail";
 
 type RoutineMeta = Pick<
   typeof Routine,

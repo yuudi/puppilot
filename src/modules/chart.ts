@@ -1,10 +1,10 @@
 import { promises as fs } from "fs";
 import path from "path";
-import { RoutineClassSchema } from "../types/routine.js";
-import { Course } from "./course.js";
-import { DataHouse } from "./database.js";
-import { Market } from "./market.js";
-import { importFile } from "./os.js";
+import { RoutineClassSchema } from "../types/routine";
+import { Course } from "./course";
+import { DataHouse } from "./database";
+import { Market } from "./market";
+import { importFile } from "./os";
 
 export class Chart {
   private routinePath!: string;
@@ -18,7 +18,7 @@ export class Chart {
     chart.db = await DataHouse.create("puppilot", "./puppilot-data/db");
     chart.routinePath = routinePath;
     await chart.loadCourses();
-    chart.market = await Market.create(chart.db.getStore("meta/market"));
+    chart.market = await Market.create(await chart.db.getStore("meta/market"));
     return chart;
   }
 

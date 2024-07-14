@@ -1,5 +1,5 @@
 import { Store } from "../types";
-import { Shop } from "./shop.js";
+import { Shop } from "./shop";
 
 interface shopInfo {
   url: string;

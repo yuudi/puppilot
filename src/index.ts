@@ -1,7 +1,7 @@
 import express, { RequestHandler, Response } from "express";
 import * as zod from "zod";
-import { readConfig } from "./config.js";
-import { Puppilot } from "./modules/puppilot.js";
+import { readConfig } from "./config";
+import { Puppilot } from "./modules/puppilot";
 import {
   ApiError,
   ApiGetMarketRoutines,
