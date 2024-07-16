@@ -8,6 +8,10 @@ interface shopInfo {
 
 const defaultShops: shopInfo[] = [
   {
+    url: "https://files.puppilot.yuudi.dev/puppilot-routines/index.json",
+    displayName: "Official Shop Mirror",
+  },
+  {
     url: "https://puppilot-org.github.io/puppilot-routines/index.json",
     displayName: "Official Shop",
   },
@@ -70,6 +74,18 @@ export class Market {
     const routines = await Promise.all(
       this.shops.map((shop) => shop.getRoutines()),
     );
-    return routines.flat();
+    return this.removeDuplicateRoutines(routines.flat());
+  }
+
+  private removeDuplicateRoutines(routines: ReturnType<Shop["getRoutines"]>) {
+    const map = new Map<string, ReturnType<Shop["getRoutines"]>[number]>();
+    routines.forEach((routine) => {
+      const r = map.get(routine.id);
+      if (r === undefined || r.updateTime < routine.updateTime) {
+        map.set(routine.id, routine);
+        return;
+      }
+    });
+    return Array.from(map.values());
   }
 }

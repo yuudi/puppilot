@@ -28,6 +28,7 @@ export class Puppilot {
     puppilot.browser = await PuppeteerBrowser.create({
       executablePath,
       headless: config.browser.headless ?? false,
+      defaultViewport: null,
       userDataDir,
       args: ["--profile-directory=Default"],
     });
@@ -66,7 +67,10 @@ export class Puppilot {
     const sail = Sail.create(courses, {
       maxParallelRoutine: 1,
     });
-    void sail.start(sailer);
+    void (async () => {
+      await sail.start(sailer);
+      await this.browser.bringDefaultPageToFront();
+    })();
     const instanceSailId = this.sails.push(sail) - 1;
     return this.instanceId + "-" + instanceSailId.toString();
   }

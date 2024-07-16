@@ -1,7 +1,20 @@
+export const enum JobStatus {
+  /** job failed */
+  Error = "error",
+  /** job failed partially */
+  Warning = "warning",
+  /** job success but need attention */
+  WeakWarning = "weak-warning",
+  /** job success */
+  Success = "success",
+  /** job skipped */
+  Dismissed = "dismissed",
+}
+
 export type SailStatus = "created" | "processing" | "completed";
 export type SailJobStatus =
   | {
-      status: "completed" | "failed" | "skipped" | "error";
+      status: JobStatus;
       message: string;
     }
   | {

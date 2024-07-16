@@ -1,5 +1,5 @@
 import { Page } from "puppeteer-core";
-import { JobResult, Promisable, SailStatus, Store } from "../types";
+import { JobResult, JobStatus, Promisable, SailStatus, Store } from "../types";
 import { TaskPool, waitWithTimeout } from "../utils/index";
 import { Course } from "./course";
 
@@ -44,7 +44,7 @@ export class Sail {
       );
     } catch (error) {
       this.results[index] = {
-        status: "error" as const,
+        status: JobStatus.Error,
         message: String((error as Error).message || error),
       };
     } finally {

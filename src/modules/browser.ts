@@ -33,6 +33,12 @@ export class PuppeteerBrowser {
     return page;
   }
 
+  public async bringDefaultPageToFront() {
+    if (this.defaultPage) {
+      await this.defaultPage.bringToFront();
+    }
+  }
+
   public async getNewPage() {
     return this.browser.newPage();
   }

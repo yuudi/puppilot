@@ -1,8 +1,7 @@
 import * as puppeteer from "puppeteer-core";
 import * as zod from "zod";
+import { JobStatus } from "./api";
 import { Promisable } from "./common";
-
-type JobStatus = "completed" | "failed" | "skipped" | "error";
 
 export interface JobResult {
   status: JobStatus;

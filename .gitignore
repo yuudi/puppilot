@@ -1,6 +1,7 @@
 /puppilot-data
 
 # Compiled output
+/release
 /dist
 /tmp
 /out-tsc
