@@ -49,6 +49,9 @@ export class Puppilot {
   public getRoutine(routineId: string) {
     return this.chart.getCourse(routineId)?.meta;
   }
+  public deleteRoutine(routineId: string) {
+    return this.chart.deleteRoutine(routineId);
+  }
   public listMarketRoutines() {
     return this.chart.getMarketRoutines();
   }

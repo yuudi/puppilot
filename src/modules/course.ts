@@ -1,3 +1,4 @@
+import { unlink } from "fs/promises";
 import * as puppeteer from "puppeteer-core";
 import { Routine, RoutineFuncSchema } from "../types";
 import { importFile } from "./os";
@@ -17,6 +18,7 @@ type RoutineMeta = Pick<
 
 export class Course {
   private routine!: Routine;
+  private filePath!: string;
 
   public get meta(): Readonly<RoutineMeta> {
     return this.routine;
@@ -24,6 +26,7 @@ export class Course {
 
   public static async create(filePath: string): Promise<Course> {
     const course = new Course();
+    course.filePath = filePath;
     const routineMod = (await importFile(filePath)) as Record<string, unknown>;
     course.routine = RoutineFuncSchema.parse(routineMod.default)() as Routine;
     return course;
@@ -37,5 +40,9 @@ export class Course {
       },
       { puppeteer },
     );
+  }
+
+  public async delete() {
+    await unlink(this.filePath);
   }
 }

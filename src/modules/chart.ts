@@ -65,6 +65,16 @@ export class Chart {
     });
   }
 
+  public async deleteRoutine(routineId: string): Promise<0 | 1> {
+    const course = this.courseMap.get(routineId);
+    if (!course) {
+      return 0;
+    }
+    await course.delete();
+    this.courseMap.delete(routineId);
+    return 1;
+  }
+
   public getDbStore(store: string) {
     return this.db.getStore(store);
   }

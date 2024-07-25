@@ -19,7 +19,7 @@ const defaultShops: shopInfo[] = [
 
 export class Market {
   private store!: Store;
-  private shops!: Shop[];
+  private shops: Shop[] = [];
 
   public static async create(store: Store) {
     const market = new Market();
@@ -31,13 +31,19 @@ export class Market {
           displayName: string;
         }[]
       >("shops")) ?? defaultShops;
-    const shops = await Promise.all(
-      shopInfos.map(({ url, displayName }) =>
-        Shop.create(url, displayName).catch(() => undefined),
-      ),
-    );
-    market.shops = shops.filter((shop): shop is Shop => shop !== undefined);
+    for (const shopInfo of shopInfos) {
+      void market.initShop(shopInfo);
+    }
     return market;
+  }
+
+  private async initShop(shopInfo: shopInfo) {
+    const { url, displayName } = shopInfo;
+    try {
+      this.shops.push(await Shop.create(url, displayName));
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   public getShops(): readonly shopInfo[] {

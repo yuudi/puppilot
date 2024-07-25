@@ -72,6 +72,26 @@ void (async function () {
     res.status(201).send();
   }) as RequestHandler);
 
+  api.delete("/routines/:routineId", (async (
+    req,
+    res: Response<undefined | ApiError>,
+  ) => {
+    let count;
+    try {
+      count = await puppilot.deleteRoutine(req.params.routineId);
+    } catch (error) {
+      res.status(500).json({ error: String(error) });
+      return;
+    }
+    if (count === 0) {
+      res
+        .status(404)
+        .json({ error: `routine ${req.params.routineId} not found` });
+      return;
+    }
+    res.status(204).send();
+  }) as RequestHandler);
+
   api.post("/market", (async (req, res: Response<undefined | ApiError>) => {
     const parseResult = zod
       .object({
