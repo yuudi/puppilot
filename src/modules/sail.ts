@@ -27,7 +27,7 @@ export class Sail {
     sail.total = courses.length;
     sail.results = Array<undefined>(sail.total);
     sail.done = 0;
-    const maxParallelRoutine = config.maxParallelRoutine || 1;
+    const maxParallelRoutine = config.maxParallelRoutine ?? 1;
     sail.taskPool = new TaskPool(maxParallelRoutine);
 
     return sail;

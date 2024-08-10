@@ -61,14 +61,14 @@ export class Puppilot {
   public addShop(url: string, displayName?: string) {
     return this.chart.addShop(url, displayName);
   }
-  public sail(routineIds: string[]) {
+  public sail(routineIds: string[], maxParallel = 1) {
     const courses = this.chart.getCourses(routineIds);
     const sailer: Sailer = {
       getNewPage: async () => this.browser.getNewPage(),
       getStore: (store: string) => this.chart.getDbStore(store),
     };
     const sail = Sail.create(courses, {
-      maxParallelRoutine: 1,
+      maxParallelRoutine: maxParallel,
     });
     void (async () => {
       await sail.start(sailer);

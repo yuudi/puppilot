@@ -114,14 +114,17 @@ void (async function () {
 
   api.post("/sails", ((req, res: Response<ApiPostSails | ApiError>) => {
     const parseResult = zod
-      .object({ routines: zod.array(zod.string()).nonempty() })
+      .object({
+        routines: zod.array(zod.string()).nonempty(),
+        maxParallel: zod.number().int().positive().optional(),
+      })
       .safeParse(req.body);
     if (!parseResult.success) {
       res.status(400).json({ error: parseResult.error.toString() });
       return;
     }
-    const routines = parseResult.data.routines;
-    const sailId = puppilot.sail(routines);
+    const { routines, maxParallel = 1 } = parseResult.data;
+    const sailId = puppilot.sail(routines, maxParallel);
     res.json({ sailId });
   }) as RequestHandler);
 
